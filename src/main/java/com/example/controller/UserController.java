@@ -14,27 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
-//    @Autowired
-//    private IPatientService patientService;
-//    @Autowired
-//    private IDoctorService doctorService;
+
     @Autowired
     private IUserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<Response> userSignp(@RequestBody UserDto userDto){
-
-//        Response response = new Response();
-//
-//        if ("patient".equalsIgnoreCase(userDto.getUser())){
-//            Patient patient = patientService.createPatient(userDto);
-//             response.setMessage("Patient created successfully!");
-//             response.setData(patient);
-//        } else if ("doctor".equalsIgnoreCase(userDto.user)) {
-//            Doctor doctor = doctorService.createDoctor(userDto);
-//            response.setMessage("Doctor created successfully!");
-//            response.setData(doctor);
-//        }
 
         User user = userService.createUser(userDto);
         Response response = new Response("User created successfully!", user);
