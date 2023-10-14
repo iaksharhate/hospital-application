@@ -1,9 +1,8 @@
 package com.example.controller;
 
 import com.example.dto.LoginDto;
-import com.example.dto.Response;
 import com.example.dto.UserDto;
-import com.example.model.User;
+import com.example.model.MasterResponse;
 import com.example.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,23 +18,17 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Response> userSignp(@RequestBody UserDto userDto){
-
-        User user = userService.createUser(userDto);
-        Response response = new Response("User created successfully!", user);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<MasterResponse> userSignup(@RequestBody UserDto userDto){
+        return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.OK);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Response> userLogin (@RequestBody LoginDto loginDto){
-        Response response = new Response("Logging request processed", userService.userLogin(loginDto));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<MasterResponse> userLogin (@RequestBody LoginDto loginDto){
+        return new ResponseEntity<>(userService.userLogin(loginDto), HttpStatus.OK);
     }
 
     @GetMapping("/getUserById/{id}")
-    public ResponseEntity<Response> getUserDetails(@PathVariable(value = "id") int id ){
-        User user = userService.getUserById(id);
-        Response response = new Response("Get call success for :"+ id, user);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<MasterResponse> getUserDetails(@PathVariable(value = "id") int id ){
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 }

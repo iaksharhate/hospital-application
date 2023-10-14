@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.dto.LoginDto;
 import com.example.dto.UserDto;
-import com.example.exception.CustomException;
+import com.example.model.MasterResponse;
 import com.example.model.User;
 import com.example.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,30 +18,52 @@ public class UserServiceImpl implements IUserService{
     @Autowired
     private IUserRepository userRepository;
     @Override
-    public User createUser(UserDto userDto) {
+    public MasterResponse createUser(UserDto userDto) {
         User user = new User(userDto);
-        return userRepository.save(user);
+        MasterResponse masterResponse = new MasterResponse();
+        masterResponse.setStatus("Success");
+        masterResponse.setCode("200");
+        masterResponse.setPayload(userRepository.save(user));
+        return masterResponse;
     }
 
     @Override
-    public Object userLogin(LoginDto loginDto) {
+    public MasterResponse userLogin(LoginDto loginDto) {
+
+        MasterResponse masterResponse = new MasterResponse();
 
         Optional<User> user = userRepository.userLogin(loginDto.getEmail(),loginDto.getPassword());
-        if (!user.isPresent()){
-            throw new CustomException("Login failed!! Username or password is incorrect.");
+        if (user.isPresent()){
+//
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(user.get());
+        } else {
+//            throw new CustomException("Login failed!! Username or password is incorrect.");
+            masterResponse.setCode("501");
+            masterResponse.setStatus("fail");
+            masterResponse.setPayload("Login failed!! Username or password is incorrect.");
         }
-        return "Log in successful!!!";
+        return masterResponse;
     }
 
     @Override
-    public User getUserById(int id) {
+    public MasterResponse getUserById(int id) {
+
+        MasterResponse masterResponse = new MasterResponse();
         User user = userRepository.findUserById(id);
 
         if (user != null) {
             log.info("GET-USER-BY-ID API RESPONSE {}", user );
-            return user;
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(user);
         } else {
-            throw new CustomException("User with id: "+id+" not found!");
+//            throw new CustomException("User with id: "+id+" not found!");
+            masterResponse.setCode("501");
+            masterResponse.setStatus("fail");
+            masterResponse.setPayload("User with id: "+id+" not found!");
         }
+        return masterResponse;
     }
 }

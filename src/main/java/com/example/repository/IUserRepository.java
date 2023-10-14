@@ -13,6 +13,6 @@ public interface IUserRepository extends JpaRepository<User, Integer> {
     @Query(value = "select * from user where email = :email and password = :password", nativeQuery = true)
     Optional<User> userLogin(String email, String password);
 
-    @Query(value = "select * from user where id = :id", nativeQuery = true)
+    @Query(value = "select * from user where user_id = :id", nativeQuery = true)
     User findUserById(int id);
 }
