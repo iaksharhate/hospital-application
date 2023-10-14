@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -19,11 +21,19 @@ public class UserServiceImpl implements IUserService{
     private IUserRepository userRepository;
     @Override
     public MasterResponse createUser(UserDto userDto) {
-        User user = new User(userDto);
         MasterResponse masterResponse = new MasterResponse();
-        masterResponse.setStatus("Success");
-        masterResponse.setCode("200");
-        masterResponse.setPayload(userRepository.save(user));
+        User user = new User(userDto);
+        Optional<User> existingUser = userRepository.findByEmail(userDto.getEmail());
+        if (existingUser.isPresent()){
+            masterResponse.setCode("501");
+            masterResponse.setStatus("fail");
+            masterResponse.setPayload("Sign up failed!! Email already registered!!");
+        } else {
+            masterResponse.setStatus("Success");
+            masterResponse.setCode("200");
+            masterResponse.setPayload(userRepository.save(user));
+        }
+
         return masterResponse;
     }
 
