@@ -1,5 +1,6 @@
 package com.example.model;
 
+import com.example.dto.UserDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,25 +12,28 @@ import javax.persistence.Id;
 @Data
 @Entity
 @NoArgsConstructor
-public class Doctor {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String user;
-    private String age;
-    private String bloodGroup;
-    private String firstName;
-    private String lastName;
-    private String gender;
-    private String email;
-    private String password;
-    private String city;
-    private String state;
-    private int pinCode;
-    private String photo;
+    public String firstName;
+    public String lastName;
+    public String user;
+    public String age;
+    public String gender;
+    public String email;
+    public String password;
+    public String bloodGroup;
+    public String city;
+    public String state;
+    public int pinCode;
+    public String photo;
+    public String specialization;
+    public String experience;
+    public String fees;
 
-    public Doctor(UserDto userDto) {
+    public User(UserDto userDto) {
         this.age = userDto.getAge();
         this.user = userDto.getUser();
         this.bloodGroup = userDto.getBloodGroup();
@@ -42,5 +46,8 @@ public class Doctor {
         this.state = userDto.getState();
         this.pinCode = userDto.getPinCode();
         this.photo = userDto.getPhoto();
+        this.specialization = userDto.getSpecialization();
+        this.experience = userDto.getExperience();
+        this.fees = userDto.getFees();
     }
 }
