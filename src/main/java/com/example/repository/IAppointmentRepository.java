@@ -15,4 +15,11 @@ public interface IAppointmentRepository extends JpaRepository<Appointment, Integ
 
     @Query(value = "select * from appointment where patient_id = :id", nativeQuery = true)
     List<Appointment> findByPatientId(int id);
+
+    @Query(value = "select * from appointment where doctor_id = :id and date_time = :dateTime", nativeQuery = true)
+    List<Appointment> findByDoctorIdAndDateTime(int id, String dateTime);
+
+
+
+
 }

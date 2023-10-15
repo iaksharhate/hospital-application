@@ -2,7 +2,6 @@ package com.example.service;
 
 import com.example.dto.AppointmentReqDto;
 import com.example.dto.AppointmentResDto;
-import com.example.dto.Response;
 import com.example.exception.CustomException;
 import com.example.model.Appointment;
 import com.example.model.MasterResponse;
@@ -30,20 +29,38 @@ public class AppointmentServiceImpl implements IAppointmentService{
         User patient = userRepository.findUserById(appointmentReqDto.getPatientId());
         User doctor = userRepository.findUserById(appointmentReqDto.getDoctorId());
 
-        if (patient == null && doctor == null){
-            throw new CustomException("Doctor or patient does is now exist");
+        try{
+            if (patient == null || doctor == null){
+                throw new CustomException("Doctor or patient does is now exist");
+            }
+
+            if (!isTimeSlotAvailable(appointmentReqDto.getDoctorId(),appointmentReqDto.getDateTime())){
+                masterResponse.setCode("501");
+                masterResponse.setStatus("failed");
+                masterResponse.setPayload("Mentioned time slot is not available!!\n Please select another time slot.");
+            } else {
+                Appointment appointment = new Appointment();
+                appointment.setDateTime(appointmentReqDto.getDateTime());
+                appointment.setStatus(appointmentReqDto.getStatus());
+                appointment.setDoctor(doctor);
+                appointment.setPatient(patient);
+
+                masterResponse.setCode("200");
+                masterResponse.setStatus("success");
+                masterResponse.setPayload(appointmentRepository.save(appointment));
+            }
+        } catch (Exception exception){
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("An error occurred while saving the appointment.");
+            return masterResponse;
         }
-
-        Appointment appointment = new Appointment();
-        appointment.setDateTime(appointmentReqDto.getDateTime());
-        appointment.setStatus(appointmentReqDto.getStatus());
-        appointment.setDoctor(doctor);
-        appointment.setPatient(patient);
-
-        masterResponse.setCode("200");
-        masterResponse.setStatus("success");
-        masterResponse.setPayload(appointmentRepository.save(appointment));
         return masterResponse;
+    }
+
+    private boolean isTimeSlotAvailable(int doctorId, String dateTime) {
+        List<Appointment> appointmentList = appointmentRepository.findByDoctorIdAndDateTime(doctorId, dateTime);
+        return appointmentList.isEmpty();
     }
 
     @Override
@@ -62,7 +79,6 @@ public class AppointmentServiceImpl implements IAppointmentService{
                 AppointmentResDto respDto = mapAppointmentToDTO(appointment);
                 appointmentResDtoList.add(respDto);
             }
-
             masterResponse.setCode("200");
             masterResponse.setStatus("success");
             masterResponse.setPayload(appointmentResDtoList);
