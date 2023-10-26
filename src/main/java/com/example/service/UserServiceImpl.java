@@ -1,14 +1,19 @@
 package com.example.service;
 
 import com.example.dto.LoginDto;
+import com.example.dto.LoginResDto;
 import com.example.dto.UserDto;
 import com.example.model.MasterResponse;
 import com.example.model.User;
 import com.example.repository.IUserRepository;
+import com.example.util.EmailService;
+import com.example.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,6 +22,10 @@ public class UserServiceImpl implements IUserService{
 
     @Autowired
     private IUserRepository userRepository;
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private EmailService emailService;
     @Override
     public MasterResponse createUser(UserDto userDto) {
         MasterResponse masterResponse = new MasterResponse();
@@ -30,6 +39,11 @@ public class UserServiceImpl implements IUserService{
             masterResponse.setStatus("Success");
             masterResponse.setCode("200");
             masterResponse.setPayload(userRepository.save(user));
+//            if ("doctor".equalsIgnoreCase(userDto.getUser())){
+                emailService.sendMail(userDto.getEmail(),
+                        "Registration successful with E-mail: "+userDto.getEmail()+ "\n"
+                                +"Password: "+ userDto.getPassword());
+//            }
         }
 
         return masterResponse;
@@ -42,10 +56,22 @@ public class UserServiceImpl implements IUserService{
 
         Optional<User> user = userRepository.userLogin(loginDto.getEmail(),loginDto.getPassword());
         if (user.isPresent()){
-//
+
+            LoginResDto loginResDto = new LoginResDto();
+            loginResDto.setToken(jwtUtils.generateToken(user.get()));
+            loginResDto.setId(user.get().getId());
+            loginResDto.setUser(user.get().user);
+            loginResDto.setFirstName(user.get().getFirstName());
+            loginResDto.setLastName(user.get().getLastName());
+            loginResDto.setEmail(user.get().getEmail());
+            loginResDto.setAge(user.get().getAge());
+            loginResDto.setGender(user.get().getGender());
+            loginResDto.setCity(user.get().getCity());
+            loginResDto.setState(user.get().getState());
+            loginResDto.setPinCode(user.get().getPinCode());
             masterResponse.setCode("200");
             masterResponse.setStatus("success");
-            masterResponse.setPayload(user.get());
+            masterResponse.setPayload(loginResDto);
         } else {
 //            throw new CustomException("Login failed!! Username or password is incorrect.");
             masterResponse.setCode("501");
@@ -71,6 +97,51 @@ public class UserServiceImpl implements IUserService{
             masterResponse.setCode("501");
             masterResponse.setStatus("fail");
             masterResponse.setPayload("User with id: "+id+" not found!");
+        }
+        return masterResponse;
+    }
+
+    @Override
+    public MasterResponse getDoctors() {
+        List<User> doctorList = userRepository.getAllDoctors("doctor");
+        MasterResponse masterResponse = new MasterResponse();
+        if (!doctorList.isEmpty()){
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(doctorList);
+        } else {
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("Error while fetching doctors detail!");
+        }
+        return masterResponse;
+    }
+
+    @Override
+    public MasterResponse updateUserById(int id, UserDto userDto) {
+        MasterResponse masterResponse = new MasterResponse();
+        User existingUser = userRepository.findUserById(id);
+        if (existingUser != null){
+            existingUser.setFirstName(userDto.getFirstName());
+            existingUser.setLastName(userDto.getLastName());
+            existingUser.setEmail(userDto.getEmail());
+            existingUser.setPassword(userDto.getPassword());
+            existingUser.setGender(userDto.getGender());
+            existingUser.setAge(userDto.getAge());
+            existingUser.setSpecialization(userDto.getSpecialization());
+            existingUser.setExperience(userDto.getExperience());
+            existingUser.setCity(userDto.getCity());
+            existingUser.setState(userDto.getState());
+            existingUser.setFees(userDto.getFees());
+            existingUser.setPinCode(userDto.getPinCode());
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(userRepository.save(existingUser));
+
+        } else {
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("Error while updating doctors detail!");
         }
         return masterResponse;
     }

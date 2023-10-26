@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@CrossOrigin(allowedHeaders = "*", origins = "*")
 @RequestMapping("/appointment")
 public class AppointmentController {
 
@@ -22,8 +23,26 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentService.createAppointment(appointmentReqDto), HttpStatus.OK);
     }
 
-    @GetMapping("/getByUserId")
-    public ResponseEntity<MasterResponse> getAppointmentsForPatient(@RequestParam int id, @RequestParam String user) {
+    @GetMapping("/getByUserId/{id}/{user}")
+    public ResponseEntity<MasterResponse> getAppointmentsForPatient(@PathVariable(value = "id") int id,
+                                                                    @PathVariable(value = "user") String user) {
         return new ResponseEntity<>(appointmentService.apptsByUserId(id, user), HttpStatus.OK);
+    }
+
+    @PatchMapping("/rescheduleById/{id}")
+    public ResponseEntity<MasterResponse> rescheduleByIdAppointment(@PathVariable(value = "id") int id,
+                                                            @RequestBody AppointmentReqDto appointmentReqDto){
+        return new ResponseEntity<>(appointmentService.rescheduleByIdById(id, appointmentReqDto),HttpStatus.OK);
+    }
+
+    @PatchMapping("/cancelById/{id}")
+    public ResponseEntity<MasterResponse> cancelAppointment(@PathVariable(value = "id") int id,
+                                                                    @RequestBody AppointmentReqDto appointmentReqDto){
+        return new ResponseEntity<>(appointmentService.cancelById(id, appointmentReqDto),HttpStatus.OK);
+    }
+
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<MasterResponse> getById(@PathVariable(value = "id") int id){
+        return new ResponseEntity<>(appointmentService.getById(id), HttpStatus.OK);
     }
 }

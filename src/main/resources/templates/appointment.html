@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointment</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap");
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            font-size: 40px;
+        }
+        h3 {
+            font-size: 30px;
+        }
+        head{
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1260px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .heading{
+            display: flex;
+            justify-content: center;
+        }
+        #header .container .heading {
+            background-color: #b3b3b3;
+            display: flex;
+            height: 50px;
+        }
+        #header .container .heading img {
+            height: 50px;
+        }
+        #header .container .col {
+            width: 50%;
+            margin: auto 0;
+            padding: 0.5%;
+        }
+        #header .container .basicInfo {
+            display: flex;
+        }
+        #header .container .basicInfo .col p {
+            margin-top: 10px;
+        }
+        /* Details */
+        #details .container .heading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #b3b3b3;
+            margin-top: 10px;
+        }
+        #details .container .heading h3 {
+            padding: 10px 0;
+            color: #01397a;
+        }
+
+    </style>
+</head>
+<body>
+<section id="header">
+    <div class="container">
+        <div class="heading">
+            <div><h2>Appointment Details</h2></div>
+        </div>
+        <div class="basicInfo" >
+            <div class="col">
+                <p><b>Appointment ID :</b> <span th:text="${details.AppointmentID}"></span></p>
+                <p><b>Patient :</b> <span th:text="${details.Patient}"></span></p>
+                <p><b>Doctor :</b> <span th:text="${details.Doctor}"></span></p>
+                <p><b>Fees :</b> <span th:text="${details.Fees}"></span></p>
+            </div>
+            <div class="col">
+                <p><b>Date :</b> <span th:text="${details.Date}"></span></p>
+                <p><b>Time :</b> <span th:text="${details.Time}"></span></p>
+                <p><b>Status :</b> <span th:text="${details.Status}"></span></p>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

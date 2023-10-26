@@ -22,7 +22,6 @@ public class User {
     public String gender;
     public String email;
     public String password;
-    public String bloodGroup;
     public String city;
     public String state;
     public int pinCode;
@@ -34,7 +33,6 @@ public class User {
     public User(UserDto userDto) {
         this.age = userDto.getAge();
         this.user = userDto.getUser();
-        this.bloodGroup = userDto.getBloodGroup();
         this.firstName = userDto.getFirstName();
         this.lastName = userDto.getLastName();
         this.gender = userDto.getGender();

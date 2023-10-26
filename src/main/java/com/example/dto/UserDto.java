@@ -14,7 +14,6 @@ public class UserDto {
     public String gender;
     public String email;
     public String password;
-    public String bloodGroup;
     public String city;
     public String state;
     public int pinCode;

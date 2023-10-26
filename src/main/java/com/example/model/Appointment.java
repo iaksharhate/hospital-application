@@ -12,8 +12,10 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "a_id")
     private int id;
-    private String dateTime;
+    private String date;
+    private String time;
     private String status;
+    private String description;
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private User doctor;
