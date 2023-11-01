@@ -20,4 +20,9 @@ public interface ITimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
     @Query(value = "update time_slot set a_date = :date, a_time = :time where a_id = :id", nativeQuery = true)
     @Transactional
     void updateByAppointmentId(@Param("id") int id, @Param("date") String date, @Param("time") String time);
+
+    @Modifying
+    @Transactional
+    @Query(value = "delete from time_slot where a_id = :id", nativeQuery = true)
+    void deleteByApptId(int id);
 }

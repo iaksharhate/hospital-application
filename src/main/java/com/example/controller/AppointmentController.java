@@ -41,8 +41,19 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentService.cancelById(id, appointmentReqDto),HttpStatus.OK);
     }
 
+    @PatchMapping("/doneById/{id}")
+    public ResponseEntity<MasterResponse> doneAppointment(@PathVariable(value = "id") int id,
+                                                            @RequestBody AppointmentReqDto appointmentReqDto){
+        return new ResponseEntity<>(appointmentService.doneById(id, appointmentReqDto),HttpStatus.OK);
+    }
+
     @GetMapping("/getById/{id}")
     public ResponseEntity<MasterResponse> getById(@PathVariable(value = "id") int id){
         return new ResponseEntity<>(appointmentService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<MasterResponse> getAllAppts(){
+        return new ResponseEntity<>(appointmentService.getAll(), HttpStatus.OK);
     }
 }

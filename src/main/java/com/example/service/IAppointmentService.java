@@ -13,6 +13,11 @@ public interface IAppointmentService {
     MasterResponse rescheduleByIdById(int id, AppointmentReqDto appointmentReqDto);
 
     MasterResponse cancelById(int id, AppointmentReqDto appointmentReqDto);
+    MasterResponse doneById(int id, AppointmentReqDto appointmentReqDto);
 
     MasterResponse getById(int id);
+
+    MasterResponse getAll();
+
+
 }

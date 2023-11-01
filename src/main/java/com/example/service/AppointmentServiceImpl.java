@@ -11,6 +11,7 @@ import com.example.repository.IAppointmentRepository;
 import com.example.repository.ITimeSlotRepository;
 import com.example.repository.IUserRepository;
 import com.example.util.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
-public class AppointmentServiceImpl implements IAppointmentService{
+public class AppointmentServiceImpl implements IAppointmentService {
 
     @Autowired
     private IAppointmentRepository appointmentRepository;
@@ -29,7 +31,10 @@ public class AppointmentServiceImpl implements IAppointmentService{
     @Autowired
     private ITimeSlotService timeSlotService;
     @Autowired
+    private ITimeSlotRepository timeSlotRepository;
+    @Autowired
     private EmailService emailService;
+
     @Override
     public MasterResponse createAppointment(AppointmentReqDto appointmentReqDto) {
 
@@ -38,8 +43,8 @@ public class AppointmentServiceImpl implements IAppointmentService{
         User patient = userRepository.findUserById(appointmentReqDto.getPatientId());
         User doctor = userRepository.findUserById(appointmentReqDto.getDoctorId());
 
-        try{
-            if (patient == null || doctor == null){
+        try {
+            if (patient == null || doctor == null) {
                 throw new CustomException("Doctor or patient does is now exist");
             }
 
@@ -61,12 +66,12 @@ public class AppointmentServiceImpl implements IAppointmentService{
             mailRequest.setCc(doctor.getEmail());
             mailRequest.setSubject("Appointment raised successfully!!");
             timeSlotService.createSlot(doctor, appointmentReqDto.getDate(),
-                                        appointmentReqDto.getTime(), raisedAppointment);
+                    appointmentReqDto.getTime(), raisedAppointment);
             Map<String, Object> details = getStringObjectMap(raisedAppointment, patient, doctor);
             mailRequest.setAppointmentDetails(details);
             emailService.sendHtmlMail(mailRequest);
 
-        } catch (Exception exception){
+        } catch (Exception exception) {
             masterResponse.setCode("500");
             masterResponse.setStatus("failed");
             masterResponse.setPayload("An error occurred while saving the appointment.");
@@ -78,8 +83,8 @@ public class AppointmentServiceImpl implements IAppointmentService{
     private static Map<String, Object> getStringObjectMap(Appointment raisedAppointment, User patient, User doctor) {
         Map<String, Object> details = new HashMap<>();
         details.put("AppointmentID", raisedAppointment.getId());
-        details.put("Patient", patient.getFirstName()+" "+ patient.getLastName());
-        details.put("Doctor", doctor.getFirstName()+" "+ doctor.getLastName());
+        details.put("Patient", patient.getFirstName() + " " + patient.getLastName());
+        details.put("Doctor", doctor.getFirstName() + " " + doctor.getLastName());
         details.put("Date", raisedAppointment.getDate());
         details.put("Time", raisedAppointment.getTime());
         details.put("Status", raisedAppointment.getStatus());
@@ -87,10 +92,6 @@ public class AppointmentServiceImpl implements IAppointmentService{
         return details;
     }
 
-    private boolean isTimeSlotAvailable(int doctorId, String date, String time) {
-        List<Appointment> appointmentList = appointmentRepository.findByDoctorIdAndDateTime(doctorId, date);
-        return appointmentList.isEmpty();
-    }
 
     @Override
     public MasterResponse apptsByUserId(int id, String user) {
@@ -100,7 +101,7 @@ public class AppointmentServiceImpl implements IAppointmentService{
         List<AppointmentResDto> appointmentResDtoList = new ArrayList<>();
 
 
-        if ("doctor".equalsIgnoreCase(user)){
+        if ("doctor".equalsIgnoreCase(user)) {
 
             appointmentList = appointmentRepository.findByDoctorId(id);
 
@@ -130,11 +131,35 @@ public class AppointmentServiceImpl implements IAppointmentService{
     }
 
     @Override
+    public MasterResponse getAll() {
+        MasterResponse masterResponse = new MasterResponse();
+        List<Appointment> appointmentList;
+        List<AppointmentResDto> appointmentResDtoList = new ArrayList<>();
+
+        appointmentList = appointmentRepository.findAll();
+
+        if (!appointmentList.isEmpty()) {
+            for (Appointment appointment : appointmentList) {
+                AppointmentResDto respDto = mapAppointmentToDTO(appointment);
+                appointmentResDtoList.add(respDto);
+            }
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(appointmentResDtoList);
+        } else {
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("An error occurred while updating the appointment.");
+        }
+        return masterResponse;
+    }
+
+    @Override
     public MasterResponse rescheduleByIdById(int id, AppointmentReqDto appointmentReqDto) {
         MasterResponse masterResponse = new MasterResponse();
 
         Appointment appointment = appointmentRepository.getById(id);
-        if (appointment != null){
+        if (appointment != null) {
             appointment.setDate(appointmentReqDto.getDate());
             appointment.setTime(appointmentReqDto.getTime());
             appointment.setStatus("rescheduled");
@@ -149,7 +174,7 @@ public class AppointmentServiceImpl implements IAppointmentService{
             mailRequest.setCc(appointment.getDoctor().getEmail());
             mailRequest.setSubject("Appointment rescheduled successfully!!");
             Map<String, Object> details = getStringObjectMap(appointment, appointment.getPatient(),
-                                                                          appointment.getDoctor());
+                    appointment.getDoctor());
             mailRequest.setAppointmentDetails(details);
             emailService.sendHtmlMail(mailRequest);
         } else {
@@ -166,11 +191,29 @@ public class AppointmentServiceImpl implements IAppointmentService{
         MasterResponse masterResponse = new MasterResponse();
 
         Appointment appointment = appointmentRepository.getById(id);
-        if (appointment != null){
+        if (appointment != null) {
+
+            timeSlotService.deleteSlot(appointment.getId());
+
+            log.info("Appointment Id: {}", appointment.getId());
+
             appointment.setStatus(appointmentReqDto.getStatus());
             masterResponse.setCode("200");
             masterResponse.setStatus("success");
+
+            MailRequest mailRequest = new MailRequest();
+            mailRequest.setTo(appointment.getPatient().getEmail());
+            mailRequest.setCc(appointment.getDoctor().getEmail());
+            mailRequest.setSubject("Appointment got cancelled!!");
+            Map<String, Object> details = getStringObjectMap(appointment, appointment.getPatient(),
+                    appointment.getDoctor());
+            mailRequest.setAppointmentDetails(details);
+
+
+            emailService.sendHtmlMail(mailRequest);
+
             masterResponse.setPayload(appointmentRepository.save(appointment));
+
         } else {
             masterResponse.setCode("500");
             masterResponse.setStatus("failed");
@@ -181,11 +224,31 @@ public class AppointmentServiceImpl implements IAppointmentService{
     }
 
     @Override
+    public MasterResponse doneById(int id, AppointmentReqDto appointmentReqDto) {
+        MasterResponse masterResponse = new MasterResponse();
+
+        Appointment appointment = appointmentRepository.getById(id);
+        if (appointment != null) {
+            timeSlotService.deleteSlot(appointment.getId());
+            appointment.setStatus(appointmentReqDto.getStatus());
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(appointmentRepository.save(appointment));
+        } else {
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("An error occurred while updating the appointment.");
+        }
+        return masterResponse;
+    }
+
+
+    @Override
     public MasterResponse getById(int id) {
         MasterResponse masterResponse = new MasterResponse();
 
         Appointment appointment = appointmentRepository.getById(id);
-        if (appointment != null){
+        if (appointment != null) {
             AppointmentResDto appointmentResDto = mapAppointmentToDTO(appointment);
             masterResponse.setCode("200");
             masterResponse.setStatus("success");
@@ -206,8 +269,8 @@ public class AppointmentServiceImpl implements IAppointmentService{
         dto.setTime(appointment.getTime());
         dto.setStatus(appointment.getStatus());
         dto.setDescription(appointment.getDescription());
-        dto.setPatientName(appointment.getPatient().getFirstName()+" "+ appointment.getPatient().getLastName());
-        dto.setDoctorName(appointment.getDoctor().getFirstName()+" "+ appointment.getDoctor().getLastName());
+        dto.setPatientName(appointment.getPatient().getFirstName() + " " + appointment.getPatient().getLastName());
+        dto.setDoctorName(appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName());
         dto.setDoctorId(appointment.getDoctor().getId());
         return dto;
     }

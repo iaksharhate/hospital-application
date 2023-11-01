@@ -68,4 +68,9 @@ public class TimeSlotServiceImpl implements ITimeSlotService{
         timeSlotRepository.updateByAppointmentId(id, date, time);
 
     }
+
+    @Override
+    public void deleteSlot(int id) {
+        timeSlotRepository.deleteByApptId(id);
+    }
 }

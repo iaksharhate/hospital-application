@@ -10,4 +10,7 @@ public interface ITimeSlotService {
     MasterResponse getByDoctorId(int id);
 
     void updateSlot(int id, String date, String time);
+
+
+    void deleteSlot(int id);
 }
