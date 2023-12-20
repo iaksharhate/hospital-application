@@ -20,6 +20,9 @@ public interface IUserRepository extends JpaRepository<User, Integer> {
     @Query(value = "select * from user where user_id = :id", nativeQuery = true)
     User findUserById(int id);
 
-    @Query(value = "select * from user where user = :user", nativeQuery = true)
-    List<User> getAllDoctors(String user);
+    @Query(value = "select * from user where user = 'doctor'", nativeQuery = true)
+    List<User> getAllDoctors();
+
+    @Query(value = "select * from user where user = 'patient'", nativeQuery = true)
+    List<User> getPatients();
 }

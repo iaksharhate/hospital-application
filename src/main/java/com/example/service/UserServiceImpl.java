@@ -8,6 +8,7 @@ import com.example.model.User;
 import com.example.repository.IUserRepository;
 import com.example.util.EmailService;
 import com.example.util.JwtUtils;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,10 @@ public class UserServiceImpl implements IUserService{
     private JwtUtils jwtUtils;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private Gson gson;
     @Override
-    public MasterResponse createUser(UserDto userDto) {
+    public MasterResponse               createUser(UserDto userDto) {
         MasterResponse masterResponse = new MasterResponse();
         User user = new User(userDto);
         Optional<User> existingUser = userRepository.findByEmail(userDto.getEmail());
@@ -103,7 +106,7 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public MasterResponse getDoctors() {
-        List<User> doctorList = userRepository.getAllDoctors("doctor");
+        List<User> doctorList = userRepository.getAllDoctors();
         MasterResponse masterResponse = new MasterResponse();
         if (!doctorList.isEmpty()){
             masterResponse.setCode("200");
@@ -143,6 +146,26 @@ public class UserServiceImpl implements IUserService{
             masterResponse.setStatus("failed");
             masterResponse.setPayload("Error while updating doctors detail!");
         }
+        return masterResponse;
+    }
+
+    @Override
+    public MasterResponse getAllPatients() {
+
+        MasterResponse masterResponse = new MasterResponse();
+        List<User> patientList = userRepository.getPatients();
+        log.info("GET-USER-DETAILS-API DB RESPONSE : {}", gson.toJson(patientList));
+
+        if (!patientList.isEmpty()){
+            masterResponse.setCode("200");
+            masterResponse.setStatus("success");
+            masterResponse.setPayload(patientList);
+        } else {
+            masterResponse.setCode("500");
+            masterResponse.setStatus("failed");
+            masterResponse.setPayload("Error while fetching patients detail!");
+        }
+        log.info("GET-USER-DETAILS-API RESPONSE : {}", gson.toJson(masterResponse));
         return masterResponse;
     }
 }

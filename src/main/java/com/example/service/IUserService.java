@@ -16,4 +16,6 @@ public interface IUserService {
     MasterResponse getDoctors();
 
     MasterResponse updateUserById(int id, UserDto userDto);
+
+    MasterResponse getAllPatients();
 }

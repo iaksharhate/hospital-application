@@ -44,4 +44,9 @@ public class UserController {
                                                      @RequestBody UserDto userDto){
         return new ResponseEntity<>(userService.updateUserById(id, userDto), HttpStatus.OK);
     }
+
+    @GetMapping("/getPatients")
+    public  ResponseEntity<MasterResponse> getPatients(){
+        return new ResponseEntity<>(userService.getAllPatients(), HttpStatus.OK);
+    }
 }

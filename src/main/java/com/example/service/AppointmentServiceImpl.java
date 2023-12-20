@@ -35,6 +35,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
     @Autowired
     private EmailService emailService;
 
+
     @Override
     public MasterResponse createAppointment(AppointmentReqDto appointmentReqDto) {
 
@@ -149,7 +150,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
         } else {
             masterResponse.setCode("500");
             masterResponse.setStatus("failed");
-            masterResponse.setPayload("An error occurred while updating the appointment.");
+            masterResponse.setPayload("An error occurred while getting appointments details.");
         }
         return masterResponse;
     }
